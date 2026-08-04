@@ -11,12 +11,12 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;--border:#2a2a38;
-  --accent:#6c63ff;--accent2:#a78bfa;--accent-dim:rgba(108,99,255,0.12);
-  --text:#f0f0f8;--text2:#9090b0;--text3:#5a5a7a;
-  --green:#22d3a0;--green-dim:rgba(34,211,160,0.1);
-  --amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);
-  --red:#f87171;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+--bg:#0a0a0f;--surface:#13131a;--surface2:#1c1c26;--border:#2a2a38;
+--accent:#6c63ff;--accent2:#a78bfa;--accent-dim:rgba(108,99,255,0.12);
+--text:#f0f0f8;--text2:#9090b0;--text3:#5a5a7a;
+--green:#22d3a0;--green-dim:rgba(34,211,160,0.1);
+--amber:#f59e0b;--amber-dim:rgba(245,158,11,0.1);
+--red:#f87171;--font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
 }
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;max-width:480px;margin:0 auto}
 .header{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--surface);position:sticky;top:0;z-index:100}
@@ -123,6 +123,11 @@ select option{background:var(--surface2)}
 .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--green);color:#000;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;transition:transform 0.3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 .panel{display:none}.panel.active{display:block}
+.item-pick{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:all 0.15s;display:flex;justify-content:space-between;align-items:center}
+.item-pick:hover{border-color:var(--accent)}
+.item-pick.active{border-color:var(--accent);background:var(--accent-dim)}
+.item-pick-name{font-size:12px;color:var(--text)}
+.item-pick-price{font-family:var(--mono);font-size:12px;color:var(--text2)}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fade-up{animation:fadeUp 0.25s ease forwards}
 @media print{.header,.nav,.btn,.add-btn,.item-del{display:none!important}.pv-page{border-radius:0;padding:16px;color:#222!important}}
@@ -131,94 +136,87 @@ select option{background:var(--surface2)}
 <body>
 
 <div class="header">
-  <div class="logo">
-    <div class="logo-mark">🧵</div>
-    <div>
-      <div class="logo-text">TextilApp</div>
-      <div class="logo-sub">Ego Mentali by PITUCOS</div>
-    </div>
-  </div>
-  <div class="sync-badge online" id="sync-badge">● CONECTADO</div>
+<div class="logo">
+<div class="logo-mark">🧵</div>
+<div>
+<div class="logo-text">TextilApp</div>
+<div class="logo-sub">Ego Mentali by PITUCOS</div>
+</div>
+</div>
+<div class="sync-badge online" id="sync-badge">● CONECTADO</div>
 </div>
 
 <div class="nav">
-  <button class="nav-btn active" onclick="showPanel('precios',this)"><span>🪡</span>Telas</button>
-  <button class="nav-btn" onclick="showPanel('presupuesto',this)"><span>📄</span>Presupuesto</button>
-  <button class="nav-btn" onclick="showPanel('historial',this)"><span>📊</span>Historial</button>
+<button class="nav-btn active" onclick="showPanel('precios',this)"><span>💰</span>Precios</button>
+<button class="nav-btn" onclick="showPanel('presupuesto',this)"><span>📄</span>Presupuesto</button>
+<button class="nav-btn" onclick="showPanel('historial',this)"><span>📊</span>Historial</button>
 </div>
 
 <!-- PANEL: PRECIOS -->
 <div class="panel active" id="panel-precios">
 <div class="container">
 
-  <div class="stats-row">
-    <div class="stat"><div class="stat-val" id="st-tipos">17</div><div class="stat-lbl">Tipos tela</div></div>
-    <div class="stat"><div class="stat-val g" id="st-hoy">0</div><div class="stat-lbl">Hoy</div></div>
-    <div class="stat"><div class="stat-val a" id="st-pend">17</div><div class="stat-lbl">Pendientes</div></div>
-  </div>
+<div class="stats-row">
+<div class="stat"><div class="stat-val" id="st-tipos">-</div><div class="stat-lbl">Ítems</div></div>
+<div class="stat"><div class="stat-val g" id="st-hoy">0</div><div class="stat-lbl">Hoy</div></div>
+<div class="stat"><div class="stat-val a" id="st-pend">-</div><div class="stat-lbl">Pendientes</div></div>
+</div>
 
-  <div class="section-label">Actualizar precio de tela</div>
-  <div class="card">
-    <div class="card-header">
-      <div class="card-icon">🪡</div>
-      <div><div class="card-title">Precio por Kg/Mt</div><div class="card-desc">Seleccioná tipo, color y nuevo precio</div></div>
-    </div>
-    <div class="card-body">
-      <label>Tipo de tela</label>
-      <select id="sel-tela" onchange="onTelaChange()">
-        <option value="">— Seleccioná —</option>
-        <option value="PIQUÉ|DANIEL">Piqué</option>
-        <option value="DEPORTIVO FRISADO|DANIEL">Deportivo Frisado</option>
-        <option value="DEPORTIVO S/FRISA|DANIEL">Deportivo S/Frisa</option>
-        <option value="FRISA PEINADA INVISIBLE|DANIEL">Frisa Peinada Invisible</option>
-        <option value="JERSEY PEINADO 24/1|DANIEL">Jersey Peinado 24/1</option>
-        <option value="LYCRA/ALGODON|QUELANA">Lycra/Algodón</option>
-        <option value="LICRA/ALGODÓN PEINADA 24/1|TEJ.EXP./QUELANA">Licra/Algodón Peinada 24/1</option>
-        <option value="GABARDINA ELASTIZADA|TEJ. EXP / GIANELLI">Gabardina Elastizada</option>
-        <option value="GABARDINA RIGIDA|TEJ. EXP / GIANELLI">Gabardina Rígida</option>
-        <option value="TROPICAL MECÁNICO|OFERTEL AS/TEXTIL ROK">Tropical Mecánico</option>
-        <option value="GABARDINA|VARIOS">Gabardina</option>
-        <option value="POLAR|VARIOS">Polar</option>
-        <option value="SARGA|VARIOS">Sarga</option>
-        <option value="ALGODÓN|VARIOS">Algodón</option>
-        <option value="ALGODÓN/POLIESTER|VARIOS">Algodón/Poliéster</option>
-        <option value="DEPORTIVA (SHORTS/POLLERAS)|VARIOS">Deportiva Shorts/Polleras</option>
-        <option value="FRISA CARDADA|VARIOS">Frisa Cardada</option>
-        <option value="INFLABLE (CAMPERAS)|VARIOS">Inflable Camperas</option>
-      </select>
+<div class="section-label">Actualizar precio</div>
+<div class="card">
+<div class="card-header">
+<div class="card-icon">💰</div>
+<div><div class="card-title">Tablas maestras</div><div class="card-desc">Elegí la tabla, el colegio y el ítem</div></div>
+</div>
+<div class="card-body">
 
-      <div id="color-sec" style="display:none">
-        <label>Color</label>
-        <div class="color-grid" id="color-grid"></div>
+<label>Tabla</label>
+<select id="sel-tabla" onchange="onTablaChange()">
+<option value="telas">Telas (por Kg/Mt)</option>
+<option value="confeccion">Confección</option>
+<option value="bordado">Bordado / Estampado</option>
+<option value="servicios">Servicios generales</option>
+</select>
 
-        <label>Proveedor</label>
-        <div class="prov-box" id="prov-box"><div class="prov-dot"></div><span id="prov-txt">—</span></div>
+<div id="colegio-sec">
+<label>Colegio</label>
+<select id="sel-colegio" onchange="onColegioChange()">
+<option value="">— Cargando colegios —</option>
+</select>
+</div>
 
-        <div class="field-row">
-          <div>
-            <label>Precio actual</label>
-            <div class="price-wrap"><span class="sym">$</span>
-              <input type="number" id="precio-actual" readonly style="color:var(--text3)">
-            </div>
-          </div>
-          <div>
-            <label>Nuevo precio</label>
-            <div class="price-wrap"><span class="sym">$</span>
-              <input type="number" id="precio-nuevo" placeholder="0" oninput="calcImpacto()">
-            </div>
-          </div>
-        </div>
+<div id="items-sec" style="display:none">
+<label id="items-label">Ítem</label>
+<div id="items-list"></div>
+</div>
 
-        <div class="impact-box" id="impact-box">
-          <div class="impact-title">⚡ Impacto en planilla</div>
-          <div id="impact-content" class="impact-item"></div>
-        </div>
+<div id="precio-sec" style="display:none">
+<div class="field-row">
+<div>
+<label id="lbl-precio-actual">Precio actual</label>
+<div class="price-wrap"><span class="sym">$</span>
+<input type="number" id="precio-actual" readonly style="color:var(--text3)">
+</div>
+</div>
+<div>
+<label>Nuevo precio</label>
+<div class="price-wrap"><span class="sym">$</span>
+<input type="number" id="precio-nuevo" placeholder="0" oninput="calcImpacto()">
+</div>
+</div>
+</div>
 
-        <button class="btn btn-primary" id="btn-guardar" onclick="guardarPrecio()">💾 Guardar en Google Sheets</button>
-        <button class="btn btn-secondary" onclick="resetTela()">Cancelar</button>
-      </div>
-    </div>
-  </div>
+<div class="impact-box" id="impact-box">
+<div class="impact-title">⚡ Cambio</div>
+<div id="impact-content" class="impact-item"></div>
+</div>
+
+<button class="btn btn-primary" id="btn-guardar" onclick="guardarPrecio()">💾 Guardar en Google Sheets</button>
+<button class="btn btn-secondary" onclick="resetSeleccion()">Cancelar</button>
+</div>
+
+</div>
+</div>
 
 </div>
 </div>
@@ -227,81 +225,81 @@ select option{background:var(--surface2)}
 <div class="panel" id="panel-presupuesto">
 <div class="container" id="pres-form-view">
 
-  <div class="section-label">Nuevo presupuesto</div>
-  <div style="font-family:var(--mono);font-size:11px;color:var(--accent2);background:var(--accent-dim);border:1px solid rgba(108,99,255,0.2);border-radius:6px;padding:4px 10px;display:inline-block;margin-bottom:12px">Presupuesto Nº <span id="pres-num">0409</span></div>
+<div class="section-label">Nuevo presupuesto</div>
+<div style="font-family:var(--mono);font-size:11px;color:var(--accent2);background:var(--accent-dim);border:1px solid rgba(108,99,255,0.2);border-radius:6px;padding:4px 10px;display:inline-block;margin-bottom:12px">Presupuesto Nº <span id="pres-num">0409</span></div>
 
-  <div class="card">
-    <div class="card-header"><div class="card-icon">👤</div><div><div class="card-title">Datos del cliente</div></div></div>
-    <div class="card-body">
-      <label>Institución / Cliente</label>
-      <input type="text" id="cli-nombre" placeholder="Ej: Colegio San Martín">
-      <div class="field-row">
-        <div><label>CUIT</label><input type="text" id="cli-cuit" placeholder="XX-XXXXXXXX-X"></div>
-        <div><label>Teléfono</label><input type="text" id="cli-tel" placeholder="11-XXXX-XXXX"></div>
-      </div>
-      <label>E-mail</label>
-      <input type="text" id="cli-email" placeholder="contacto@cliente.com">
-      <div class="field-row">
-        <div><label>Fecha</label><input type="date" id="pres-fecha"></div>
-        <div><label>Validez</label>
-          <select id="pres-validez">
-            <option>7 días</option><option>15 días</option><option>30 días</option><option>A convenir</option>
-          </select>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="card">
+<div class="card-header"><div class="card-icon">👤</div><div><div class="card-title">Datos del cliente</div></div></div>
+<div class="card-body">
+<label>Institución / Cliente</label>
+<input type="text" id="cli-nombre" placeholder="Ej: Colegio San Martín">
+<div class="field-row">
+<div><label>CUIT</label><input type="text" id="cli-cuit" placeholder="XX-XXXXXXXX-X"></div>
+<div><label>Teléfono</label><input type="text" id="cli-tel" placeholder="11-XXXX-XXXX"></div>
+</div>
+<label>E-mail</label>
+<input type="text" id="cli-email" placeholder="contacto@cliente.com">
+<div class="field-row">
+<div><label>Fecha</label><input type="date" id="pres-fecha"></div>
+<div><label>Validez</label>
+<select id="pres-validez">
+<option>7 días</option><option>15 días</option><option>30 días</option><option>A convenir</option>
+</select>
+</div>
+</div>
+</div>
+</div>
 
-  <div class="card">
-    <div class="card-header"><div class="card-icon">📦</div><div><div class="card-title">Ítems</div><div class="card-desc">Cargá cada prenda con talle y precio</div></div></div>
-    <div class="card-body">
-      <label>Agregar del catálogo</label>
-      <select id="quick-sel" onchange="quickAdd()">
-        <option value="">— Agregar prenda rápida —</option>
-        <option value="CHOMBA PIQUÉ CON LOGO|27000">Chomba Piqué con Logo</option>
-        <option value="CHOMBA PIQUÉ SIN LOGO|23000">Chomba Piqué sin Logo</option>
-        <option value="BUZO DEPORTIVO FRISADO CON LOGO|35000">Buzo Deportivo Frisado con Logo</option>
-        <option value="CAMPERA DEPORTIVA FRISADA CON LOGO|47000">Campera Deportiva Frisada con Logo</option>
-        <option value="PANTALON LARGO DEPORTIVO FRISADO CON LOGO|37000">Pantalón Deportivo Frisado con Logo</option>
-        <option value="REMERA PIQUÉ CON LOGO|20000">Remera Piqué con Logo</option>
-        <option value="REMERA ML PIQUÉ CON LOGO|22000">Remera ML Piqué con Logo</option>
-        <option value="POLLERA DEPORTIVA CON LOGO|20000">Pollera Deportiva con Logo</option>
-        <option value="SHORT DEPORTIVO CON LOGO|18000">Short Deportivo con Logo</option>
-        <option value="BERMUDA DEPORTIVA CON LOGO|22000">Bermuda Deportiva con Logo</option>
-      </select>
+<div class="card">
+<div class="card-header"><div class="card-icon">📦</div><div><div class="card-title">Ítems</div><div class="card-desc">Cargá cada prenda con talle y precio</div></div></div>
+<div class="card-body">
+<label>Agregar del catálogo</label>
+<select id="quick-sel" onchange="quickAdd()">
+<option value="">— Agregar prenda rápida —</option>
+<option value="CHOMBA PIQUÉ CON LOGO|27000">Chomba Piqué con Logo</option>
+<option value="CHOMBA PIQUÉ SIN LOGO|23000">Chomba Piqué sin Logo</option>
+<option value="BUZO DEPORTIVO FRISADO CON LOGO|35000">Buzo Deportivo Frisado con Logo</option>
+<option value="CAMPERA DEPORTIVA FRISADA CON LOGO|47000">Campera Deportiva Frisada con Logo</option>
+<option value="PANTALON LARGO DEPORTIVO FRISADO CON LOGO|37000">Pantalón Deportivo Frisado con Logo</option>
+<option value="REMERA PIQUÉ CON LOGO|20000">Remera Piqué con Logo</option>
+<option value="REMERA ML PIQUÉ CON LOGO|22000">Remera ML Piqué con Logo</option>
+<option value="POLLERA DEPORTIVA CON LOGO|20000">Pollera Deportiva con Logo</option>
+<option value="SHORT DEPORTIVO CON LOGO|18000">Short Deportivo con Logo</option>
+<option value="BERMUDA DEPORTIVA CON LOGO|22000">Bermuda Deportiva con Logo</option>
+</select>
 
-      <div class="items-wrap" id="items-wrap"></div>
-      <button class="add-btn" onclick="addItem()">＋ Agregar ítem manual</button>
+<div class="items-wrap" id="items-wrap"></div>
+<button class="add-btn" onclick="addItem()">＋ Agregar ítem manual</button>
 
-      <div class="tots-box">
-        <div class="tot-row"><span>Subtotal</span><span class="v" id="tot-sub">$0</span></div>
-        <div class="tot-row"><span>IVA</span><span class="v">$0</span></div>
-        <div class="tot-row grand"><span>TOTAL</span><span class="v" id="tot-grand">$0</span></div>
-      </div>
+<div class="tots-box">
+<div class="tot-row"><span>Subtotal</span><span class="v" id="tot-sub">$0</span></div>
+<div class="tot-row"><span>IVA</span><span class="v">$0</span></div>
+<div class="tot-row grand"><span>TOTAL</span><span class="v" id="tot-grand">$0</span></div>
+</div>
 
-      <button class="btn btn-primary" onclick="verPreview()">👁 Ver presupuesto</button>
-    </div>
-  </div>
+<button class="btn btn-primary" onclick="verPreview()">👁 Ver presupuesto</button>
+</div>
+</div>
 
 </div>
 
 <!-- PREVIEW PDF -->
 <div class="container" id="pres-preview-view" style="display:none">
-  <div class="pv-page" id="pv-page"></div>
-  <button class="btn btn-primary" onclick="window.print()">🖨 Guardar como PDF</button>
-  <button class="btn btn-secondary" onclick="volverForm()">← Editar</button>
+<div class="pv-page" id="pv-page"></div>
+<button class="btn btn-primary" onclick="window.print()">🖨 Guardar como PDF</button>
+<button class="btn btn-secondary" onclick="volverForm()">← Editar</button>
 </div>
 </div>
 
 <!-- PANEL: HISTORIAL -->
 <div class="panel" id="panel-historial">
 <div class="container">
-  <div class="section-label">Historial de cambios</div>
-  <div class="card" style="overflow:hidden">
-    <div id="hist-container">
-      <div class="empty-state">Sin actualizaciones registradas.<br><span style="font-size:11px">Los cambios se guardan automáticamente acá.</span></div>
-    </div>
-  </div>
+<div class="section-label">Historial de cambios</div>
+<div class="card" style="overflow:hidden">
+<div id="hist-container">
+<div class="empty-state">Sin actualizaciones registradas.<br><span style="font-size:11px">Los cambios se guardan automáticamente acá.</span></div>
+</div>
+</div>
 </div>
 </div>
 
@@ -309,341 +307,329 @@ select option{background:var(--surface2)}
 
 <script src="config.js"></script>
 <script>
-// ── AUTH JWT para Google Sheets API ──────────────────────────────
-async function getAccessToken() {
-  const now = Math.floor(Date.now() / 1000);
-  const header = { alg: "RS256", typ: "JWT" };
-  const payload = {
-    iss: SHEETS_CONFIG.clientEmail,
-    scope: SHEETS_CONFIG.scopes.join(" "),
-    aud: "https://oauth2.googleapis.com/token",
-    exp: now + 3600,
-    iat: now
-  };
-  const enc = (obj) => btoa(JSON.stringify(obj)).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const sigInput = enc(header) + "." + enc(payload);
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    pemToBuffer(SHEETS_CONFIG.privateKey),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false, ["sign"]
-  );
-  const sig = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(sigInput));
-  const jwt = sigInput + "." + btoa(String.fromCharCode(...new Uint8Array(sig))).replace(/=/g,'').replace(/\+/g,'-').replace(/\//g,'_');
-  const res = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST", headers: {"Content-Type":"application/x-www-form-urlencoded"},
-    body: `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer&assertion=${jwt}`
-  });
-  const data = await res.json();
-  return data.access_token;
-}
-
-function pemToBuffer(pem) {
-  const b64 = pem.replace(/-----[^-]+-----/g,'').replace(/\s/g,'');
-  const bin = atob(b64);
-  const buf = new Uint8Array(bin.length);
-  for(let i=0;i<bin.length;i++) buf[i]=bin.charCodeAt(i);
-  return buf.buffer;
-}
-
-async function sheetsRead(range) {
-  const tok = await getAccessToken();
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.spreadsheetId}/values/${encodeURIComponent(range)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${tok}` } });
-  return res.json();
-}
-
-async function sheetsWrite(range, values) {
-  const tok = await getAccessToken();
-  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEETS_CONFIG.spreadsheetId}/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`;
-  const res = await fetch(url, {
-    method: "PUT", headers: { Authorization: `Bearer ${tok}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ range, majorDimension: "ROWS", values })
-  });
-  return res.json();
-}
+// ── CONFIG DE TABLAS ──────────────────────────────────────────────
+const TABLAS = {
+telas: { label:'Telas', porColegio:true, priceLabel:'Precio / Kg-Mt',
+itemLabel:(r)=> `${r.tela} · ${r.color} (${r.proveedor})`, priceField:'precio' },
+confeccion: { label:'Confección', porColegio:true, priceLabel:'Tarifa de confección',
+itemLabel:(r)=> r.articulo, priceField:'tarifa' },
+bordado: { label:'Bordado / Estampado', porColegio:true, priceLabel:'Precio',
+itemLabel:(r)=> `${r.articulo} (${r.tecnica})`, priceField:'precio' },
+servicios: { label:'Servicios generales', porColegio:false, priceLabel:'Tarifa',
+itemLabel:(r)=> r.servicio, priceField:'tarifa',
+// Solo estos servicios generales son editables desde la app
+soloEstos:['Corte','Viatico','Cierre 75/80','Cierre corto','Abrojo','Ojal','Boton','Packaging'] }
+};
 
 // ── ESTADO ────────────────────────────────────────────────────────
-let selTela = null, selColor = null, selProv = null;
+let itemsActuales = [];
+let itemSeleccionado = null;
 let historial = [], updatedCount = 0;
 let itemCount = 0;
 
-const COLORES = ['AZUL','AZUL MARINO','AZUL FRANCIA','BLANCO','NEGRO','CELESTE','BORDO','GRIS MELANGE','GRIS TOPO','GRIS PERLADO','ROJO','VERDE','VERDE OSCURO','BEIGE','MARRÓN','NARANJA','PIEL'];
-const PRECIOS = {
-  'PIQUÉ_BLANCO':10200,'PIQUÉ_CELESTE':10600,'PIQUÉ_NEGRO':11500,'PIQUÉ_AZUL MARINO':11500,
-  'PIQUÉ_BORDO':12200,'PIQUÉ_ROJO':12200,'PIQUÉ_VERDE':12200,'PIQUÉ_AZUL FRANCIA':12200,
-  'DEPORTIVO FRISADO_BLANCO':10600,'DEPORTIVO FRISADO_NEGRO':12000,'DEPORTIVO FRISADO_AZUL MARINO':12000,
-  'DEPORTIVO FRISADO_BORDO':12700,'DEPORTIVO FRISADO_ROJO':12700,'DEPORTIVO FRISADO_VERDE':12700,
-  'DEPORTIVO FRISADO_AZUL FRANCIA':12700,'FRISA PEINADA INVISIBLE_BLANCO':10200,
-  'FRISA PEINADA INVISIBLE_GRIS MELANGE':11000,'FRISA PEINADA INVISIBLE_NEGRO':11500,
-  'JERSEY PEINADO 24/1_BLANCO':10250,'JERSEY PEINADO 24/1_NEGRO':11300,
-  'TROPICAL MECÁNICO_AZUL':5500,'GABARDINA ELASTIZADA_AZUL':15000,'GABARDINA RIGIDA_AZUL':15000,
-  'LYCRA/ALGODON_AZUL':17000,'LICRA/ALGODÓN PEINADA 24/1_AZUL':18000,
-};
-const IMPACT_MAP = {
-  'PIQUÉ':{prendas:'Chomba, Remera, Remera ML',colegios:'ENSPA, PALAÁ, LORETO, ISFD 101',filas:95},
-  'DEPORTIVO FRISADO':{prendas:'Buzo, Campera, Pantalón',colegios:'ENSPA, LORETO, ISFD 101',filas:87},
-  'GABARDINA RIGIDA':{prendas:'Short, Pollera Uniforme',colegios:'ENSPA',filas:32},
-  'GABARDINA ELASTIZADA':{prendas:'Bermuda',colegios:'ENSPA',filas:18},
-  'TROPICAL MECÁNICO':{prendas:'Pollera Primaria',colegios:'ENSPA',filas:7},
-  'JERSEY PEINADO 24/1':{prendas:'Remera Jersey',colegios:'ISFD 101',filas:18},
-};
+// ── API (Apps Script) ───────────────────────────────────────────
+async function apiGet(params) {
+const url = `${APP_CONFIG.apiUrl}?${new URLSearchParams(params).toString()}`;
+const res = await fetch(url);
+return res.json();
+}
+
+async function apiPost(body) {
+// text/plain evita el preflight CORS que Apps Script no maneja
+const res = await fetch(APP_CONFIG.apiUrl, {
+method: 'POST',
+headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+body: JSON.stringify({ ...body, token: APP_CONFIG.token })
+});
+return res.json();
+}
 
 // ── NAV ───────────────────────────────────────────────────────────
 function showPanel(id, btn) {
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  btn.classList.add('active');
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+document.getElementById('panel-'+id).classList.add('active');
+btn.classList.add('active');
 }
 
-// ── TELAS ─────────────────────────────────────────────────────────
-function onTelaChange() {
-  const val = document.getElementById('sel-tela').value;
-  const sec = document.getElementById('color-sec');
-  if (!val) { sec.style.display='none'; return; }
-  const [tela, prov] = val.split('|');
-  selTela = tela; selProv = prov; selColor = null;
-  document.getElementById('prov-txt').textContent = prov;
-  const grid = document.getElementById('color-grid');
-  grid.innerHTML = COLORES.map(c=>`<span class="color-tag" onclick="selectColor('${c}',this)">${c}</span>`).join('');
-  document.getElementById('precio-actual').value = '';
-  document.getElementById('precio-nuevo').value = '';
-  document.getElementById('impact-box').style.display = 'none';
-  sec.style.display = 'block';
+// ── PRECIOS: carga inicial ─────────────────────────────────────────
+async function cargarColegios() {
+const sel = document.getElementById('sel-colegio');
+try {
+const colegios = await apiGet({ action: 'colegios' });
+sel.innerHTML = '<option value="">— Seleccioná —</option>' +
+colegios.map(c => `<option value="${c}">${c}</option>`).join('');
+setBadge('online', '● CONECTADO');
+} catch (e) {
+sel.innerHTML = '<option value="">Error al cargar</option>';
+setBadge('error', '● SIN CONEXIÓN');
+}
 }
 
-function selectColor(color, el) {
-  selColor = color;
-  document.querySelectorAll('.color-tag').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  const key = selTela + '_' + color;
-  document.getElementById('precio-actual').value = PRECIOS[key] || 0;
-  document.getElementById('precio-nuevo').value = '';
-  document.getElementById('impact-box').style.display = 'none';
+function onTablaChange() {
+const tabla = document.getElementById('sel-tabla').value;
+const cfg = TABLAS[tabla];
+document.getElementById('colegio-sec').style.display = cfg.porColegio ? 'block' : 'none';
+document.getElementById('items-sec').style.display = 'none';
+document.getElementById('precio-sec').style.display = 'none';
+document.getElementById('impact-box').style.display = 'none';
+itemSeleccionado = null;
+if (!cfg.porColegio) {
+cargarItems(tabla, null);
+}
+}
+
+function onColegioChange() {
+const tabla = document.getElementById('sel-tabla').value;
+const colegio = document.getElementById('sel-colegio').value;
+document.getElementById('items-sec').style.display = 'none';
+document.getElementById('precio-sec').style.display = 'none';
+if (colegio) cargarItems(tabla, colegio);
+}
+
+async function cargarItems(tabla, colegio) {
+const cfg = TABLAS[tabla];
+const itemsSec = document.getElementById('items-sec');
+const list = document.getElementById('items-list');
+document.getElementById('items-label').textContent = cfg.label;
+list.innerHTML = '<div class="empty-state">Cargando…</div>';
+itemsSec.style.display = 'block';
+try {
+const params = { action: tabla };
+if (colegio) params.colegio = colegio;
+let rows = await apiGet(params);
+if (cfg.soloEstos) {
+rows = rows.filter(r => cfg.soloEstos.includes(r.servicio));
+}
+itemsActuales = rows;
+document.getElementById('st-tipos').textContent = rows.length;
+document.getElementById('st-pend').textContent = rows.length;
+if (!rows.length) {
+list.innerHTML = '<div class="empty-state">Sin ítems para esta selección.</div>';
+return;
+}
+list.innerHTML = rows.map((r, i) => `
+<div class="item-pick" onclick="seleccionarItem(${i})" id="pick-${i}">
+<span class="item-pick-name">${cfg.itemLabel(r)}</span>
+<span class="item-pick-price">$${Number(r[cfg.priceField]||0).toLocaleString('es-AR')}</span>
+</div>`).join('');
+} catch (e) {
+list.innerHTML = '<div class="empty-state">Error al cargar. Revisá la conexión.</div>';
+setBadge('error', '● ERROR');
+}
+}
+
+function seleccionarItem(i) {
+const tabla = document.getElementById('sel-tabla').value;
+const cfg = TABLAS[tabla];
+itemSeleccionado = itemsActuales[i];
+document.querySelectorAll('.item-pick').forEach(el=>el.classList.remove('active'));
+document.getElementById('pick-'+i).classList.add('active');
+document.getElementById('lbl-precio-actual').textContent = cfg.priceLabel + ' actual';
+document.getElementById('precio-actual').value = itemSeleccionado[cfg.priceField] || 0;
+document.getElementById('precio-nuevo').value = '';
+document.getElementById('impact-box').style.display = 'none';
+document.getElementById('precio-sec').style.display = 'block';
 }
 
 function calcImpacto() {
-  const nuevo = parseFloat(document.getElementById('precio-nuevo').value) || 0;
-  const actual = parseFloat(document.getElementById('precio-actual').value) || 0;
-  const box = document.getElementById('impact-box');
-  if (!nuevo || !selColor) { box.style.display='none'; return; }
-  const diff = nuevo - actual;
-  const pct = actual > 0 ? ((diff/actual)*100).toFixed(1) : '—';
-  const sign = diff >= 0 ? '+' : '';
-  const imp = IMPACT_MAP[selTela] || {prendas:'Varias prendas',colegios:'Varios colegios',filas:10};
-  const color = diff >= 0 ? 'var(--amber)' : 'var(--green)';
-  box.style.display = 'block';
-  document.getElementById('impact-content').innerHTML =
-    `📦 <b>${imp.filas} filas</b> en hoja GENERAL<br>` +
-    `👕 ${imp.prendas}<br>` +
-    `🏫 ${imp.colegios}<br>` +
-    `📈 <span style="color:${color};font-weight:600">${sign}$${Math.abs(diff).toLocaleString('es-AR')} (${sign}${pct}%)</span>`;
+const nuevo = parseFloat(document.getElementById('precio-nuevo').value) || 0;
+const actual = parseFloat(document.getElementById('precio-actual').value) || 0;
+const box = document.getElementById('impact-box');
+if (!nuevo || !itemSeleccionado) { box.style.display='none'; return; }
+const diff = nuevo - actual;
+const pct = actual > 0 ? ((diff/actual)*100).toFixed(1) : '—';
+const sign = diff >= 0 ? '+' : '';
+const color = diff >= 0 ? 'var(--amber)' : 'var(--green)';
+box.style.display = 'block';
+document.getElementById('impact-content').innerHTML =
+`📈 <span style="color:${color};font-weight:600">${sign}$${Math.abs(diff).toLocaleString('es-AR')} (${sign}${pct}%)</span>`;
 }
 
 async function guardarPrecio() {
-  const nuevo = parseFloat(document.getElementById('precio-nuevo').value);
-  const actual = parseFloat(document.getElementById('precio-actual').value) || 0;
-  if (!selTela || !selColor || !nuevo) { showToast('Completá todos los campos', false); return; }
+const tabla = document.getElementById('sel-tabla').value;
+const cfg = TABLAS[tabla];
+const nuevo = parseFloat(document.getElementById('precio-nuevo').value);
+const actual = parseFloat(document.getElementById('precio-actual').value) || 0;
+if (!itemSeleccionado || !nuevo) { showToast('Completá todos los campos', false); return; }
 
-  const btn = document.getElementById('btn-guardar');
-  btn.disabled = true; btn.textContent = '⏳ Guardando en Sheets...';
-  setBadge('syncing', '● SINCRONIZANDO');
+const btn = document.getElementById('btn-guardar');
+btn.disabled = true; btn.textContent = '⏳ Guardando en Sheets...';
+setBadge('syncing', '● SINCRONIZANDO');
 
-  try {
-    // Leer hoja TELAS para encontrar la fila correcta
-    const data = await sheetsRead("'TELAS (INSUMO)'!A:E");
-    const rows = data.values || [];
-    let targetRow = -1;
-    for (let i = 0; i < rows.length; i++) {
-      const r = rows[i];
-      const tela = (r[0]||'').trim().toUpperCase();
-      const color = (r[2]||'').trim().toUpperCase();
-      if (tela === selTela.toUpperCase() && color === selColor.toUpperCase()) {
-        targetRow = i + 1; break;
-      }
-    }
-    if (targetRow === -1) throw new Error('No se encontró la fila en la planilla');
+try {
+const resp = await apiPost({ sheet: tabla, row: itemSeleccionado.row, value: nuevo });
+if (resp.error) throw new Error(resp.error);
 
-    // Escribir nuevo precio en columna D
-    const range = `'TELAS (INSUMO)'!D${targetRow}`;
-    await sheetsWrite(range, [[nuevo]]);
-
-    // Actualizar estado local
-    PRECIOS[selTela+'_'+selColor] = nuevo;
-    historial.unshift({ tela: selTela, color: selColor, prov: selProv, nuevo, actual, fecha: new Date() });
-    updatedCount++;
-    document.getElementById('st-hoy').textContent = updatedCount;
-    document.getElementById('st-pend').textContent = Math.max(0, 17 - updatedCount);
-    renderHistorial();
-    setBadge('online', '● CONECTADO');
-    showToast(`✓ ${selTela} ${selColor} → $${nuevo.toLocaleString('es-AR')}`);
-    resetTela();
-  } catch (err) {
-    setBadge('error', '● ERROR');
-    showToast('Error al guardar: ' + err.message, false);
-    console.error(err);
-  } finally {
-    btn.disabled = false; btn.textContent = '💾 Guardar en Google Sheets';
-  }
+itemSeleccionado[cfg.priceField] = nuevo;
+historial.unshift({ nombre: cfg.itemLabel(itemSeleccionado), tabla: cfg.label, nuevo, actual, fecha: new Date() });
+updatedCount++;
+document.getElementById('st-hoy').textContent = updatedCount;
+renderHistorial();
+setBadge('online', '● CONECTADO');
+showToast(`✓ ${cfg.itemLabel(itemSeleccionado)} → $${nuevo.toLocaleString('es-AR')}`);
+resetSeleccion();
+const colegio = document.getElementById('sel-colegio').value;
+cargarItems(tabla, cfg.porColegio ? colegio : null);
+} catch (err) {
+setBadge('error', '● ERROR');
+showToast('Error al guardar: ' + err.message, false);
+console.error(err);
+} finally {
+btn.disabled = false; btn.textContent = '💾 Guardar en Google Sheets';
+}
 }
 
-function resetTela() {
-  document.getElementById('sel-tela').value = '';
-  document.getElementById('color-sec').style.display = 'none';
-  selTela = selColor = selProv = null;
+function resetSeleccion() {
+document.getElementById('precio-sec').style.display = 'none';
+document.getElementById('impact-box').style.display = 'none';
+document.querySelectorAll('.item-pick').forEach(el=>el.classList.remove('active'));
+itemSeleccionado = null;
 }
 
 // ── HISTORIAL ─────────────────────────────────────────────────────
 function renderHistorial() {
-  const cont = document.getElementById('hist-container');
-  if (!historial.length) {
-    cont.innerHTML = '<div class="empty-state">Sin actualizaciones aún.</div>'; return;
-  }
-  cont.innerHTML = historial.map(h => `
-    <div class="hist-row fade-up">
-      <div><div class="hist-tela">${h.tela}</div><div class="hist-color">${h.color} · ${h.prov}</div></div>
-      <div><div class="hist-precio">$${h.nuevo.toLocaleString('es-AR')}</div><div class="hist-prev">$${h.actual.toLocaleString('es-AR')}</div></div>
-      <div class="hist-fecha">${h.fecha.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})}</div>
-    </div>`).join('');
+const cont = document.getElementById('hist-container');
+if (!historial.length) {
+cont.innerHTML = '<div class="empty-state">Sin actualizaciones aún.</div>'; return;
+}
+cont.innerHTML = historial.map(h => `
+<div class="hist-row fade-up">
+<div><div class="hist-tela">${h.nombre}</div><div class="hist-color">${h.tabla}</div></div>
+<div><div class="hist-precio">$${h.nuevo.toLocaleString('es-AR')}</div><div class="hist-prev">$${h.actual.toLocaleString('es-AR')}</div></div>
+<div class="hist-fecha">${h.fecha.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})}</div>
+</div>`).join('');
 }
 
 // ── PRESUPUESTO ───────────────────────────────────────────────────
 document.getElementById('pres-fecha').value = new Date().toISOString().split('T')[0];
 
 function quickAdd() {
-  const sel = document.getElementById('quick-sel');
-  if (!sel.value) return;
-  const [desc, precio] = sel.value.split('|');
-  addItem(desc, '', 1, parseInt(precio));
-  sel.value = '';
+const sel = document.getElementById('quick-sel');
+if (!sel.value) return;
+const [desc, precio] = sel.value.split('|');
+addItem(desc, '', 1, parseInt(precio));
+sel.value = '';
 }
 
 function addItem(desc='', talle='', cant=1, precio=0) {
-  itemCount++;
-  const id = 'it' + itemCount;
-  const wrap = document.getElementById('items-wrap');
-  const div = document.createElement('div');
-  div.className = 'item-row fade-up'; div.id = id;
-  div.innerHTML = `
-    <button class="item-del" onclick="delItem('${id}')">×</button>
-    <label>Descripción</label>
-    <input type="text" value="${desc}" placeholder="Prenda y detalle" oninput="calcTots()" style="margin-bottom:8px">
-    <div class="item-grid">
-      <div><label>Talle</label><input type="text" value="${talle}" placeholder="S/M/L..."></div>
-      <div><label>Cant.</label><input type="number" value="${cant}" min="1" oninput="calcTots()"></div>
-      <div><label>Precio</label><input type="number" value="${precio}" min="0" oninput="calcTots()" style="font-family:var(--mono)"></div>
-    </div>
-    <div class="item-total" id="${id}-tot">Total: $${(cant*precio).toLocaleString('es-AR')}</div>`;
-  wrap.appendChild(div);
-  calcTots();
+itemCount++;
+const id = 'it' + itemCount;
+const wrap = document.getElementById('items-wrap');
+const div = document.createElement('div');
+div.className = 'item-row fade-up'; div.id = id;
+div.innerHTML = `
+<button class="item-del" onclick="delItem('${id}')">×</button>
+<label>Descripción</label>
+<input type="text" value="${desc}" placeholder="Prenda y detalle" oninput="calcTots()" style="margin-bottom:8px">
+<div class="item-grid">
+<div><label>Talle</label><input type="text" value="${talle}" placeholder="S/M/L..."></div>
+<div><label>Cant.</label><input type="number" value="${cant}" min="1" oninput="calcTots()"></div>
+<div><label>Precio</label><input type="number" value="${precio}" min="0" oninput="calcTots()" style="font-family:var(--mono)"></div>
+</div>
+<div class="item-total" id="${id}-tot">Total: $${(cant*precio).toLocaleString('es-AR')}</div>`;
+wrap.appendChild(div);
+calcTots();
 }
 
 function delItem(id) {
-  document.getElementById(id)?.remove();
-  calcTots();
+document.getElementById(id)?.remove();
+calcTots();
 }
 
 function calcTots() {
-  let sub = 0;
-  document.querySelectorAll('#items-wrap .item-row').forEach(row => {
-    const nums = row.querySelectorAll('input[type=number]');
-    if (nums.length >= 2) {
-      const cant = parseFloat(nums[0].value) || 0;
-      const precio = parseFloat(nums[1].value) || 0;
-      const tot = cant * precio;
-      const td = row.querySelector('.item-total');
-      if (td) td.textContent = 'Total: $' + tot.toLocaleString('es-AR');
-      sub += tot;
-    }
-  });
-  document.getElementById('tot-sub').textContent = '$' + sub.toLocaleString('es-AR');
-  document.getElementById('tot-grand').textContent = '$' + sub.toLocaleString('es-AR');
-  return sub;
+let sub = 0;
+document.querySelectorAll('#items-wrap .item-row').forEach(row => {
+const nums = row.querySelectorAll('input[type=number]');
+if (nums.length >= 2) {
+const cant = parseFloat(nums[0].value) || 0;
+const precio = parseFloat(nums[1].value) || 0;
+const tot = cant * precio;
+const td = row.querySelector('.item-total');
+if (td) td.textContent = 'Total: $' + tot.toLocaleString('es-AR');
+sub += tot;
+}
+});
+document.getElementById('tot-sub').textContent = '$' + sub.toLocaleString('es-AR');
+document.getElementById('tot-grand').textContent = '$' + sub.toLocaleString('es-AR');
+return sub;
 }
 
 function verPreview() {
-  const rows = document.querySelectorAll('#items-wrap .item-row');
-  if (!rows.length) { showToast('Agregá al menos un ítem', false); return; }
-  const num = document.getElementById('pres-num').textContent;
-  const cliNombre = document.getElementById('cli-nombre').value || '—';
-  const cliCuit = document.getElementById('cli-cuit').value || '—';
-  const cliTel = document.getElementById('cli-tel').value || '—';
-  const cliEmail = document.getElementById('cli-email').value || '—';
-  const fechaRaw = document.getElementById('pres-fecha').value;
-  const fecha = fechaRaw ? new Date(fechaRaw+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
-  const validez = document.getElementById('pres-validez').value;
-  const sub = calcTots();
+const rows = document.querySelectorAll('#items-wrap .item-row');
+if (!rows.length) { showToast('Agregá al menos un ítem', false); return; }
+const num = document.getElementById('pres-num').textContent;
+const cliNombre = document.getElementById('cli-nombre').value || '—';
+const cliCuit = document.getElementById('cli-cuit').value || '—';
+const cliTel = document.getElementById('cli-tel').value || '—';
+const cliEmail = document.getElementById('cli-email').value || '—';
+const fechaRaw = document.getElementById('pres-fecha').value;
+const fecha = fechaRaw ? new Date(fechaRaw+'T12:00:00').toLocaleDateString('es-AR',{day:'2-digit',month:'long',year:'numeric'}) : '—';
+const validez = document.getElementById('pres-validez').value;
+const sub = calcTots();
 
-  let filas = '';
-  rows.forEach(row => {
-    const txt = row.querySelectorAll('input[type=text]');
-    const nums = row.querySelectorAll('input[type=number]');
-    const desc = txt[0]?.value||'';
-    const talle = txt[1]?.value||'';
-    const cant = nums[0]?.value||'0';
-    const precio = parseInt(nums[1]?.value)||0;
-    const tot = (parseInt(cant)||0)*precio;
-    filas += `<tr><td>${desc}</td><td>${talle}</td><td>${cant}</td><td>$${precio.toLocaleString('es-AR')}</td><td>$${tot.toLocaleString('es-AR')}</td></tr>`;
-  });
+let filas = '';
+rows.forEach(row => {
+const txt = row.querySelectorAll('input[type=text]');
+const nums = row.querySelectorAll('input[type=number]');
+const desc = txt[0]?.value||'';
+const talle = txt[1]?.value||'';
+const cant = nums[0]?.value||'0';
+const precio = parseInt(nums[1]?.value)||0;
+const tot = (parseInt(cant)||0)*precio;
+filas += `<tr><td>${desc}</td><td>${talle}</td><td>${cant}</td><td>$${precio.toLocaleString('es-AR')}</td><td>$${tot.toLocaleString('es-AR')}</td></tr>`;
+});
 
-  document.getElementById('pv-page').innerHTML = `
-    <div class="pv-head">
-      <div class="pv-emp"><strong>Ego Mentali by PITUCOS</strong>Av Mitre 541 (Galería El Sol - Local 26) - Avellaneda<br>CUIT-NIF: 23-17391839-9<br>Teléfono: 11-7624-2172<br>E-mail: facturacion@egomentali.com.ar</div>
-      <div class="pv-num-box"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">Presupuesto</div><div class="pv-num-big">Nº ${num}</div><div class="pv-fecha">Fecha: ${fecha}</div><div class="pv-valid">⏱ Validez: ${validez}</div></div>
-    </div>
-    <div class="pv-cli">
-      <div class="pv-cli-title">Datos del cliente</div>
-      <div class="pv-cli-grid"><span>Nombre:</span><span>${cliNombre}</span><span>CUIT-NIF:</span><span>${cliCuit}</span><span>Teléfono:</span><span>${cliTel}</span><span>E-mail:</span><span>${cliEmail}</span></div>
-    </div>
-    <table class="pv-tbl"><thead><tr><th>Descripción</th><th>Talle</th><th>Unidades</th><th>Precio</th><th>Total</th></tr></thead><tbody>${filas}</tbody></table>
-    <div class="pv-tots"><div class="pv-tots-box">
-      <div class="pv-tot-row"><span>Sub-Total</span><span class="val">$${sub.toLocaleString('es-AR')}</span></div>
-      <div class="pv-tot-row"><span>IVA</span><span class="val">$0</span></div>
-      <div class="pv-tot-row grand"><span>TOTAL PRESUPUESTADO</span><span class="val">$${sub.toLocaleString('es-AR')}</span></div>
-    </div></div>
-    <div style="font-size:10px;color:#aaa;text-align:center;margin-top:12px;font-style:italic">PRECIOS SIN IVA</div>
-    <div class="pv-firmas">
-      <div class="pv-firma"><div class="pv-firma-line"></div>Firma de quien confecciona el presupuesto</div>
-      <div class="pv-firma"><div class="pv-firma-line"></div>Firma de aceptación del cliente</div>
-    </div>`;
+document.getElementById('pv-page').innerHTML = `
+<div class="pv-head">
+<div class="pv-emp"><strong>Ego Mentali by PITUCOS</strong>Av Mitre 541 (Galería El Sol - Local 26) - Avellaneda<br>CUIT-NIF: 23-17391839-9<br>Teléfono: 11-7624-2172<br>E-mail: facturacion@egomentali.com.ar</div>
+<div class="pv-num-box"><div style="font-size:10px;color:#888;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px">Presupuesto</div><div class="pv-num-big">Nº ${num}</div><div class="pv-fecha">Fecha: ${fecha}</div><div class="pv-valid">⏱ Validez: ${validez}</div></div>
+</div>
+<div class="pv-cli">
+<div class="pv-cli-title">Datos del cliente</div>
+<div class="pv-cli-grid"><span>Nombre:</span><span>${cliNombre}</span><span>CUIT-NIF:</span><span>${cliCuit}</span><span>Teléfono:</span><span>${cliTel}</span><span>E-mail:</span><span>${cliEmail}</span></div>
+</div>
+<table class="pv-tbl"><thead><tr><th>Descripción</th><th>Talle</th><th>Unidades</th><th>Precio</th><th>Total</th></tr></thead><tbody>${filas}</tbody></table>
+<div class="pv-tots"><div class="pv-tots-box">
+<div class="pv-tot-row"><span>Sub-Total</span><span class="val">$${sub.toLocaleString('es-AR')}</span></div>
+<div class="pv-tot-row"><span>IVA</span><span class="val">$0</span></div>
+<div class="pv-tot-row grand"><span>TOTAL PRESUPUESTADO</span><span class="val">$${sub.toLocaleString('es-AR')}</span></div>
+</div></div>
+<div style="font-size:10px;color:#aaa;text-align:center;margin-top:12px;font-style:italic">PRECIOS SIN IVA</div>
+<div class="pv-firmas">
+<div class="pv-firma"><div class="pv-firma-line"></div>Firma de quien confecciona el presupuesto</div>
+<div class="pv-firma"><div class="pv-firma-line"></div>Firma de aceptación del cliente</div>
+</div>`;
 
-  document.getElementById('pres-form-view').style.display = 'none';
-  document.getElementById('pres-preview-view').style.display = 'block';
-  const next = (parseInt(num)+1).toString().padStart(4,'0');
-  document.getElementById('pres-num').textContent = next;
+document.getElementById('pres-form-view').style.display = 'none';
+document.getElementById('pres-preview-view').style.display = 'block';
+const next = (parseInt(num)+1).toString().padStart(4,'0');
+document.getElementById('pres-num').textContent = next;
 }
 
 function volverForm() {
-  document.getElementById('pres-form-view').style.display = 'block';
-  document.getElementById('pres-preview-view').style.display = 'none';
+document.getElementById('pres-form-view').style.display = 'block';
+document.getElementById('pres-preview-view').style.display = 'none';
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────
 function setBadge(type, txt) {
-  const b = document.getElementById('sync-badge');
-  b.className = 'sync-badge ' + type;
-  b.textContent = txt;
+const b = document.getElementById('sync-badge');
+b.className = 'sync-badge ' + type;
+b.textContent = txt;
 }
 
 function showToast(msg, ok=true) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.background = ok ? 'var(--green)' : 'var(--red)';
-  t.style.color = ok ? '#000' : '#fff';
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3500);
+const t = document.getElementById('toast');
+t.textContent = msg;
+t.style.background = ok ? 'var(--green)' : 'var(--red)';
+t.style.color = ok ? '#000' : '#fff';
+t.classList.add('show');
+setTimeout(() => t.classList.remove('show'), 3500);
 }
 
-// Test de conexión al cargar
-(async () => {
-  try {
-    await sheetsRead("'TELAS (INSUMO)'!A1");
-    setBadge('online', '● CONECTADO');
-  } catch(e) {
-    setBadge('error', '● SIN CONEXIÓN');
-  }
-})();
+// Init
+cargarColegios();
 </script>
 </body>
 </html>
